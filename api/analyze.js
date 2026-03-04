@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require('@supabase/supabase-js')
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -7,14 +7,13 @@ const supabase = createClient(
 
 const API_KEY = process.env.ANTHROPIC_API_KEY
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const { cardId, answerVi } = req.body
   if (!answerVi) return res.status(400).json({ error: 'answerVi required' })
   if (!API_KEY) return res.status(500).json({ error: 'API key not configured' })
 
-  // Return cached result if available
   if (cardId) {
     const { data } = await supabase
       .from('analysis_cache')

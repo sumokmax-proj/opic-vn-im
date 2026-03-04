@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
-import { createHash } from 'crypto'
+const { createClient } = require('@supabase/supabase-js')
+const { createHash } = require('crypto')
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -8,16 +8,14 @@ const supabase = createClient(
 
 const API_KEY = process.env.ANTHROPIC_API_KEY
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const { profile, cardIds } = req.body
   if (!profile) return res.status(400).json({ error: 'profile required' })
   if (!API_KEY) return res.status(500).json({ error: 'API key not configured' })
 
-  // Fetch cards from Supabase
-  let query = supabase.from('cards').select('*').order('id')
-  const { data: allCards, error: cardsErr } = await query
+  const { data: allCards, error: cardsErr } = await supabase.from('cards').select('*').order('id')
   if (cardsErr) return res.status(500).json({ error: cardsErr.message })
 
   const targets = cardIds
@@ -45,7 +43,6 @@ export default async function handler(req, res) {
   for (const card of targets) {
     const cacheKey = `${card.id}_${profileHashStr}`
 
-    // Check Supabase cache
     const { data: cached } = await supabase
       .from('customize_cache')
       .select('new_answer_vi, new_answer_ko')
@@ -99,8 +96,7 @@ ${profileLines}
 
       if (!apiRes.ok) {
         const errData = await apiRes.json().catch(() => ({}))
-        const msg = errData?.error?.message ?? `API ${apiRes.status}`
-        failed.push({ id: card.id, error: msg })
+        failed.push({ id: card.id, error: errData?.error?.message ?? `API ${apiRes.status}` })
         continue
       }
 
@@ -108,17 +104,10 @@ ${profileLines}
       const raw = apiData.content[0].text.trim()
       const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
       const match = text.match(/\{[\s\S]*\}/)
-      if (!match) {
-        failed.push({ id: card.id, error: 'AI 응답 파싱 실패' })
-        continue
-      }
+      if (!match) { failed.push({ id: card.id, error: 'AI 응답 파싱 실패' }); continue }
+
       let parsed
-      try {
-        parsed = JSON.parse(match[0])
-      } catch {
-        failed.push({ id: card.id, error: 'AI 응답 파싱 실패' })
-        continue
-      }
+      try { parsed = JSON.parse(match[0]) } catch { failed.push({ id: card.id, error: 'AI 응답 파싱 실패' }); continue }
 
       await supabase.from('customize_cache').upsert({
         cache_key: cacheKey,

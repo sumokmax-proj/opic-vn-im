@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require('@supabase/supabase-js')
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -16,7 +16,7 @@ function toCardShape(c) {
   }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { id } = req.query
 
   if (req.method === 'PUT') {

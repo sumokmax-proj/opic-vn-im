@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js')
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -16,17 +16,13 @@ function toCardShape(c) {
   }
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   const { id } = req.query
 
   if (req.method === 'PUT') {
     const { data: existing, error: fetchErr } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('id', id)
-      .single()
+      .from('cards').select('*').eq('id', id).single()
     if (fetchErr) return res.status(404).json({ error: 'Card not found' })
-
     const b = req.body
     const { data, error } = await supabase
       .from('cards')
@@ -38,9 +34,7 @@ module.exports = async function handler(req, res) {
         answer_ko: b.answer_ko ?? existing.answer_ko,
         level: b.level ?? existing.level,
       })
-      .eq('id', id)
-      .select()
-      .single()
+      .eq('id', id).select().single()
     if (error) return res.status(500).json({ error: error.message })
     return res.json(toCardShape(data))
   }

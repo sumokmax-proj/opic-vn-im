@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js')
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -16,7 +16,7 @@ function toCardShape(c) {
   }
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'GET') {
     const { data, error } = await supabase.from('cards').select('*').order('id')
     if (error) return res.status(500).json({ error: error.message })
@@ -26,10 +26,8 @@ module.exports = async function handler(req, res) {
   if (req.method === 'POST') {
     const { data: existing, error: listErr } = await supabase.from('cards').select('id')
     if (listErr) return res.status(500).json({ error: listErr.message })
-
     const maxId = existing.reduce((max, c) => Math.max(max, parseInt(c.id)), 0)
     const newId = String(maxId + 1).padStart(3, '0')
-
     const { data, error } = await supabase
       .from('cards')
       .insert({
@@ -42,8 +40,7 @@ module.exports = async function handler(req, res) {
         level: req.body.level ?? 'IM',
         tags: [req.body.category ?? '자기소개'],
       })
-      .select()
-      .single()
+      .select().single()
     if (error) return res.status(500).json({ error: error.message })
     return res.json(toCardShape(data))
   }

@@ -26,7 +26,7 @@ function saveSeen(set) {
   localStorage.setItem('opic_seen', JSON.stringify([...set]))
 }
 
-export default function Study({ cards, onAdminClick }) {
+export default function Study({ cards, wrongOnly, onHome }) {
   const [category, setCategory] = useState('전체')
   const [isRandom, setIsRandom] = useState(true)
   const [index, setIndex] = useState(0)
@@ -127,22 +127,20 @@ export default function Study({ cards, onAdminClick }) {
       {/* Header */}
       <header className="border-b border-[#E8E4DF] px-4 sticky top-0 bg-[#FAFAF8] z-10">
         <div className="max-w-2xl mx-auto flex items-center justify-between py-3.5">
+          <button
+            onClick={onHome}
+            className="text-xs text-[#8C8480] hover:text-[#4A4340] transition-colors"
+          >
+            ← 홈
+          </button>
           <h1 className="text-sm font-semibold text-[#2C2C2C] tracking-tight">
-            OPIc 베트남어
+            {wrongOnly ? '오답노트' : '공부하기'}
           </h1>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-[#8C8480]">
-              {total > 0 && card
-                ? `${category === '전체' ? parseInt(card.id) : index + 1} / ${total}`
-                : '0 / 0'}
-            </span>
-            <button
-              onClick={onAdminClick}
-              className="text-xs text-[#7C6F5B] font-medium hover:underline"
-            >
-              관리
-            </button>
-          </div>
+          <span className="text-xs text-[#8C8480]">
+            {total > 0 && card
+              ? `${category === '전체' ? parseInt(card.id) : index + 1} / ${total}`
+              : '0 / 0'}
+          </span>
         </div>
         {/* Progress bar */}
         <div className="h-1 bg-[#E8E4DF]">

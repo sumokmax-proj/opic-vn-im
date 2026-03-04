@@ -179,7 +179,7 @@ export default function Admin({ cards, onRefresh, onBack }) {
               onClick={onBack}
               className="text-xs text-[#7C6F5B] font-medium hover:underline"
             >
-              ← 학습으로
+              ← 홈
             </button>
             <span className="text-[#E8E4DF]">|</span>
             <h1 className="text-sm font-semibold text-[#2C2C2C]">관리</h1>

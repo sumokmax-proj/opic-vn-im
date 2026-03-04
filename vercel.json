@@ -9,6 +9,9 @@
   "functions": {
     "api/customize.js": {
       "maxDuration": 60
+    },
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
     }
   }
 }
